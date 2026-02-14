@@ -3,6 +3,7 @@ package com.constructora.demo.Movement;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/inventory")
+@SecurityRequirement(name = "bearerAuth")
 public class MovementController {
 
     final private MovementService movementService;
@@ -30,6 +32,7 @@ public class MovementController {
     }
 
     @GetMapping("/history")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<MovementResponse>> getMovementHistory() {
         return ResponseEntity.ok(movementService.getRecentActivity());
     }

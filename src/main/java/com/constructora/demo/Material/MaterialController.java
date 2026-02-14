@@ -3,6 +3,7 @@ package com.constructora.demo.Material;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/inventory")
+@SecurityRequirement(name = "bearerAuth")
 public class MaterialController {
 
     final private MaterialService materialService;
