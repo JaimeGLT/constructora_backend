@@ -1,4 +1,4 @@
-package com.constructora.demo.Auth;
+package com.constructora.demo.Movement;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequest {
-    String dni;
-    String password;
-
+public class MovementRequest {
+    TipoMovimiento tipo;
+    int cantidad;
+    String nota;
 }

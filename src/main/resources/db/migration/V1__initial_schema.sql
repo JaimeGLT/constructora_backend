@@ -1,19 +1,17 @@
--- 1. CREACIÓN DE TIPOS ENUM (Se definen una sola vez)
-CREATE TYPE rol_usuario AS ENUM ('ADMIN', 'OBRERO');
-CREATE TYPE estado_usuario AS ENUM ('ACTIVO', 'INACTIVO');
+-- 1. CREACIÓN DE TIPOS ENUM (sin rol_usuario)
 CREATE TYPE tipo_movimiento AS ENUM ('ENTRADA', 'SALIDA');
 CREATE TYPE estado_asistencia AS ENUM ('A TIEMPO', 'RETRASO');
 
--- 2. TABLA DE USUARIOS
+-- 2. TABLA DE USUARIOS (ROL es VARCHAR ahora)
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     nombre_completo VARCHAR(100) NOT NULL,
     dni VARCHAR(20) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    rol rol_usuario DEFAULT 'OBRERO',
+    rol VARCHAR(20) DEFAULT 'OBRERO',  -- ✅ VARCHAR en lugar de ENUM
     cargo VARCHAR(50),
     salario_diario DECIMAL(10, 2) DEFAULT 0.00,
-    estado estado_usuario DEFAULT 'ACTIVO',
+    estado BOOLEAN DEFAULT TRUE,
     ultimo_gps_texto VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -23,24 +21,20 @@ CREATE TABLE materiales (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(100),
-    unidad VARCHAR(20),
-    stock_actual DECIMAL(10, 2) DEFAULT 0,
-    stock_minimo DECIMAL(10, 2) DEFAULT 10,
-    stock_maximo DECIMAL(10, 2) DEFAULT 500,
-    imagen_url VARCHAR(255)
+    stock INTEGER DEFAULT 0,
+    stock_maximo INTEGER DEFAULT 500,
+    porcentaje_cantidad INT
 );
 
 -- 4. TABLA DE MOVIMIENTOS
 CREATE TABLE movimientos_inventario (
     id SERIAL PRIMARY KEY,
     material_id INT NOT NULL,
-    usuario_id INT NOT NULL,
     tipo tipo_movimiento NOT NULL,
-    cantidad DECIMAL(10, 2) NOT NULL,
+    cantidad INTEGER NOT NULL,
     nota VARCHAR(255),
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_material FOREIGN KEY (material_id) REFERENCES materiales(id) ON DELETE CASCADE,
-    CONSTRAINT fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    CONSTRAINT fk_material FOREIGN KEY (material_id) REFERENCES materiales(id) ON DELETE CASCADE
 );
 
 -- 5. TABLA DE ASISTENCIAS
@@ -57,7 +51,7 @@ CREATE TABLE asistencias (
 
 -- 6. CONFIGURACIÓN DE OBRA
 CREATE TABLE config_obra (
-    id INT PRIMARY KEY, -- Generalmente solo habrá un ID 1
+    id INT PRIMARY KEY,
     latitud_centro DECIMAL(10, 8) NOT NULL,
     longitud_centro DECIMAL(11, 8) NOT NULL,
     radio_permitido_metros INT DEFAULT 100

@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,53 +24,77 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(
-    name = "users",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"dni"})
-)
-
+@Table(name = "usuarios", uniqueConstraints = @UniqueConstraint(columnNames = { "dni" }))
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
-    String nombre_completo;
-    @Column(nullable = false)
-    String dni;
-    @Column(nullable = false, length = 255)
-    String password_hash;
+    private Integer id;
+
+    @Column(name = "nombre_completo", nullable = false)
+    private String nombreCompleto;
+
+    @Column(nullable = false, unique = true)
+    private String dni;
+
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
     @Enumerated(EnumType.STRING)
-    Role rol;
-    String cargo;
-    BigDecimal salario_diario;
-    boolean estado;
-    String ultimo_gps_texto;
+    private Role rol;
+
+    private String cargo;
+
+    @Column(name = "salario_diario")
+    private BigDecimal salarioDiario;
+
+    private Boolean estado;
+
+    @Column(name = "ultimo_gps_texto")
+    private String ultimoGpsTexto;
+
     @CreationTimestamp
-    LocalDateTime created_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-
-
+    // Métodos de UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority((rol.name())));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
     }
-
 
     @Override
-    public @Nullable String getPassword() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPassword'");
+    public String getPassword() {
+        return passwordHash; // Spring Security usa esto para validar
     }
 
-    
     @Override
     public String getUsername() {
-          // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
+        return dni; // Usamos el DNI como username
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return estado != null && estado; // Usuario activo si estado es true
     }
 }
