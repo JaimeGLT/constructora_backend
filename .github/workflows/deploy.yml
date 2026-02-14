@@ -47,11 +47,22 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo docker pull 305919526433.dkr.ecr.sa-east-1.amazonaws.com/mi-backend-api:latest
-            sudo docker stop constructora-backend || true
-            sudo docker rm constructora-backend || true
-            sudo docker run -d -p 8080:8080 --name constructora-backend --restart always \
+            # 1. Loguear el servidor EC2 en Amazon ECR (ESTO TE FALTABA)
+            aws ecr get-login-password --region sa-east-1 | docker login --username AWS --password-stdin 305919526433.dkr.ecr.sa-east-1.amazonaws.com
+
+            # 2. Bajar la imagen nueva (Ahora sí tendrá permiso)
+            docker pull 305919526433.dkr.ecr.sa-east-1.amazonaws.com/mi-backend-api:latest
+
+            # 3. Limpiar el contenedor anterior
+            docker stop constructora-backend || true
+            docker rm constructora-backend || true
+
+            # 4. Lanzar la nueva versión con las variables de entorno
+            docker run -d -p 8080:8080 --name constructora-backend --restart always \
               -e SPRING_DATASOURCE_URL=jdbc:postgresql://constructora-db.cl86cwe24aki.sa-east-1.rds.amazonaws.com:5432/postgres \
               -e SPRING_DATASOURCE_USERNAME=postgres \
               -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
               305919526433.dkr.ecr.sa-east-1.amazonaws.com/mi-backend-api:latest
+            
+            # 5. Limpiar imágenes huérfanas para no llenar el disco
+            docker image prune -f
