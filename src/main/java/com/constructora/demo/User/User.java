@@ -54,9 +54,8 @@ public class User implements UserDetails {
     private BigDecimal salarioDiario;
 
     private Boolean estado;
-
-    @Column(name = "ultimo_gps_texto")
-    private String ultimoGpsTexto;
+    @Column(name = "estado_asistencia")
+    private String estadoAsistencia;
 
     @CreationTimestamp
     @Column(name = "created_at")

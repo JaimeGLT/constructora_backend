@@ -45,6 +45,7 @@ public class AuthService {
                                 .cargo(request.getCargo())
                                 .estado(true)
                                 .salarioDiario(request.getSalarioDiario())
+                                .estadoAsistencia("A TIEMPO")
                                 .build();
 
                 userRepository.save(user);

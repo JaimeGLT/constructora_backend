@@ -15,7 +15,7 @@ public class UserMapper {
                 .cargo(user.getCargo())
                 .salarioDiario(user.getSalarioDiario())
                 .estado(Boolean.TRUE.equals(user.getEstado()))
-                .ultimoGpsTexto(user.getUltimoGpsTexto())
+                .estadoAsistencia(user.getEstadoAsistencia())
                 .createdAt(
                         user.getCreatedAt() != null
                                 ? user.getCreatedAt().format(FORMATTER)

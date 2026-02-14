@@ -18,7 +18,7 @@ public class UserResponse {
     Role rol;
     String cargo;
     BigDecimal salarioDiario;
+    String estadoAsistencia;
     boolean estado;
-    String ultimoGpsTexto;
     String createdAt;
 }

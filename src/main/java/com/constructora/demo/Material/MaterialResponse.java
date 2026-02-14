@@ -16,6 +16,7 @@ public class MaterialResponse {
     Integer stock;
     Integer maxStock;
     Integer porcentajeCantidad;
+    String estado;
 
     public static MaterialResponse from(Material material) {
         return MaterialResponse.builder()
@@ -25,6 +26,8 @@ public class MaterialResponse {
                 .stock(material.getStock())
                 .maxStock(material.getMaxStock())
                 .porcentajeCantidad(material.getPorcentajeCantidad())
+                .estado(material.getStock() <= (material.getMaxStock() * 0.1) ? "Nivel Crítico"
+                        : material.getStock() <= (material.getMaxStock() * 0.4) ? "Stock Bajo" : "Saludable")
                 .build();
     }
 }
