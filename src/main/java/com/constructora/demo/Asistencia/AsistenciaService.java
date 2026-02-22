@@ -48,7 +48,7 @@ public class AsistenciaService {
         LocalTime horaActual = LocalTime.now();
         LocalTime limiteATiempo = LocalTime.of(8, 30); // Hasta las 08:30 AM es A TIEMPO
         LocalTime limiteRetraso = LocalTime.of(11, 59); // Hasta las 11:59 AM es RETRASO
-        LocalTime limiteJornada = LocalTime.of(12, 00); // Después de las 12:00 PM ya no se puede marcar
+        LocalTime limiteJornada = LocalTime.of(20, 00); // Después de las 12:00 PM ya no se puede marcar
 
         // Si intenta marcar después de las 4 PM, lo bloqueamos.
         if (horaActual.isAfter(limiteJornada)) {
