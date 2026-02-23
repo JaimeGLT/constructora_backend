@@ -34,6 +34,10 @@ public class AsistenciaService {
         ConfigObra config = configObraRepository.findById(1)
                 .orElseThrow(() -> new RuntimeException("Configuración de obra no encontrada."));
 
+        // verificar que el uusario exista
+        User usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+
         // 2. Calcular distancia
         double distancia = calcularDistancia(latObrero, lonObrero, config.getLatitudCentro(),
                 config.getLongitudCentro());
@@ -75,8 +79,7 @@ public class AsistenciaService {
         asistencia.setLatitud(latObrero);
         asistencia.setLongitud(lonObrero);
         asistencia.setEstado(estadoCalculado); // Insertamos el string que calculamos
-        User usuario = userRepository.findById(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+
         usuario.setEstadoAsistencia(estadoCalculado);
 
         try {
