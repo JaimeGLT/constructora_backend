@@ -10,6 +10,7 @@ import com.constructora.demo.User.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
@@ -20,8 +21,10 @@ public class AsistenciaService {
     private final ConfigObraRepository configObraRepository;
     private final UserRepository userRepository;
 
-    // Inyección de dependencias por constructor (no uses @Autowired en los campos,
-    // es una mala práctica)
+    // Constante inmutable para la zona horaria. Esto evita errores tipográficos.
+    private static final ZoneId ZONA_BOLIVIA = ZoneId.of("America/La_Paz");
+
+    // Inyección de dependencias por constructor
     public AsistenciaService(AsistenciaRepository asistenciaRepository, ConfigObraRepository configObraRepository,
             UserRepository userRepository) {
         this.asistenciaRepository = asistenciaRepository;
@@ -34,7 +37,7 @@ public class AsistenciaService {
         ConfigObra config = configObraRepository.findById(1)
                 .orElseThrow(() -> new RuntimeException("Configuración de obra no encontrada."));
 
-        // verificar que el uusario exista
+        // Verificar que el usuario exista
         User usuario = userRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
 
@@ -49,36 +52,29 @@ public class AsistenciaService {
         }
 
         // --- NUEVA LÓGICA DE NEGOCIO ESTRICTA PARA EL TIEMPO ---
-        LocalTime horaActual = LocalTime.now();
+        LocalTime horaActual = LocalTime.now(ZONA_BOLIVIA);
         LocalTime limiteATiempo = LocalTime.of(8, 30); // Hasta las 08:30 AM es A TIEMPO
         LocalTime limiteRetraso = LocalTime.of(11, 59); // Hasta las 11:59 AM es RETRASO
-        // LocalTime limiteJornada = LocalTime.of(20, 00);
 
-        // Si intenta marcar después de las 4 PM, lo bloqueamos.
-        // if (horaActual.isAfter(limiteJornada)) {
-        // throw new IllegalArgumentException(
-        // "La jornada de ingreso ha terminado. Ya no puedes marcar asistencia hoy.");
-        // }
-
-        // Calculamos el estado de acuerdo a la hora en que el servidor recibe la
-        // petición
+        // Calculamos el estado de acuerdo a la hora en la zona de la obra
         String estadoCalculado;
         if (!horaActual.isAfter(limiteATiempo)) {
-            estadoCalculado = "A TIEMPO"; // 00:00 a 08:00
+            estadoCalculado = "A TIEMPO"; // 00:00 a 08:30
         } else if (!horaActual.isAfter(limiteRetraso)) {
-            estadoCalculado = "RETRASO"; // 08:01 a 08:30
+            estadoCalculado = "RETRASO"; // 08:31 a 11:59
         } else {
-            estadoCalculado = "FALTA"; // 08:31 a 16:00
+            estadoCalculado = "FALTA"; // 12:00 en adelante
         }
         // -------------------------------------------------------
+
         // 4. Construir y guardar la entidad
         Asistencia asistencia = new Asistencia();
         asistencia.setUsuarioId(usuarioId);
-        asistencia.setFecha(LocalDate.now());
-        asistencia.setHoraEntrada(horaActual); // Usamos la hora que capturamos arriba
+        asistencia.setFecha(LocalDate.now(ZONA_BOLIVIA)); // Corregido: Fecha atada a la zona
+        asistencia.setHoraEntrada(horaActual); // Usamos la hora capturada arriba
         asistencia.setLatitud(latObrero);
         asistencia.setLongitud(lonObrero);
-        asistencia.setEstado(estadoCalculado); // Insertamos el string que calculamos
+        asistencia.setEstado(estadoCalculado);
 
         usuario.setEstadoAsistencia(estadoCalculado);
 
@@ -90,7 +86,7 @@ public class AsistenciaService {
         }
     }
 
-    // El motor matemático (privado porque solo le importa al servicio)
+    // El motor matemático
     private double calcularDistancia(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371; // Radio de la tierra en km
         double latDistance = Math.toRadians(lat2 - lat1);
@@ -105,7 +101,8 @@ public class AsistenciaService {
     }
 
     public AsistenciaStatusResponseDTO verificarEstadoHoy(Integer usuarioId) {
-        LocalDate hoy = LocalDate.now();
+        // CORREGIDO: Ahora la verificación también usa la zona horaria correcta
+        LocalDate hoy = LocalDate.now(ZONA_BOLIVIA);
         Optional<Asistencia> asistenciaHoy = asistenciaRepository.findByUsuarioIdAndFecha(usuarioId, hoy);
 
         if (asistenciaHoy.isPresent()) {
