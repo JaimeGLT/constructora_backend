@@ -7,7 +7,11 @@ import com.constructora.demo.ConfigObra.ConfigObraRepository;
 import com.constructora.demo.User.User;
 import com.constructora.demo.User.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Scheduled;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -23,6 +27,13 @@ public class AsistenciaService {
 
     // Constante inmutable para la zona horaria. Esto evita errores tipográficos.
     private static final ZoneId ZONA_BOLIVIA = ZoneId.of("America/La_Paz");
+
+    @Scheduled(cron = "0 0 0 * * *", zone = "America/La_Paz")
+    @Transactional
+    public void resetAttendanceStatus() {
+        // Opción 1: Query nativa o JPQL para eficiencia masiva
+        userRepository.updateAllAttendanceStatus("FALTA");
+    }
 
     // Inyección de dependencias por constructor
     public AsistenciaService(AsistenciaRepository asistenciaRepository, ConfigObraRepository configObraRepository,

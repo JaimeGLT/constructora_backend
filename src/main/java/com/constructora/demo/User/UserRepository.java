@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,5 +29,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                 FROM User u
             """)
     BigDecimal totalDailyNomina();
+
+    @Modifying
+    @Query("UPDATE User u SET u.estadoAsistencia = :status")
+    void updateAllAttendanceStatus(@Param("status") String status);
 
 }
