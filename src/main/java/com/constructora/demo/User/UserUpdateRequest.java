@@ -16,7 +16,7 @@ public class UserUpdateRequest {
     String dni;
     Role rol;
     String cargo;
-    BigDecimal SalarioDiario;
+    BigDecimal salarioDiario;
     String password;
     Boolean estado;
 }
